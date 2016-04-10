@@ -1,0 +1,30 @@
+DISTCLEANFILES = \
+	INSTALL \
+	Makefile \
+	Makefile.in \
+	configure \
+	config \
+	aclocal.m4 \
+	config.guess \
+	config.h.in \
+	config.h.in~ \
+	config.log \
+	config.status \
+	config.sub \
+	depcomp \
+	install-sh \
+	ltmain.sh \
+	missing \
+	capplan.tab.h \
+	capplan.tab.c \
+	capplan.c \
+	m4/libtool.m4 \
+	m4/lt~obsolete.m4 \
+	m4/ltoptions.m4 \
+	m4/ltsugar.m4 \
+	m4/ltversion.m4 \
+	ylwrap
+
+SUFFIXES = .c .h .y .l
+AM_YFLAGS = -d
+AM_LFLAGS = -i
