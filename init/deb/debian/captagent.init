@@ -15,13 +15,13 @@
 . /lib/lsb/init-functions
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/local/rtpagent/bin/captagent
+DAEMON=/usr/local/captagent/bin/captagent
 NAME=`basename "$0"`
 DESC="Captagent"
 HOMEDIR=/var/run/$NAME
 PIDFILE=/var/run/$NAME.pid
 DEFAULTS=/etc/default/$NAME
-CFGFILE=/usr/local/rtpagent/etc/captagent.xml
+CFGFILE=/usr/local/captagent/etc/captagent.xml
 RUN_CAPTAGENT=no
 USER=captagent
 GROUP=captagent

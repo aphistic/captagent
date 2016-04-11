@@ -61,7 +61,10 @@
 
 #include <pcap.h>
 
+
 /* HEP */
+#include "extra_api.h"
+
 #include "../../transport/hep/localapi.h"
 
 
@@ -76,7 +79,6 @@ static int description(char *descr);
 static int statistic(char *buf, size_t len);
 static int free_profile(unsigned int idx);
 static uint64_t serial_module(void);
-static transport_hep_api_t hepapi;
 
 #include <captagent/api.h>
 #include <captagent/proto_sip.h>
@@ -367,14 +369,20 @@ int proceed_delete_request(struct mg_request_info * request_info, struct mg_conn
 	json_object *jobj_reply = NULL;
 	char *filename = NULL;
 	char buf[200];
-	const char *requestUuid = NULL;
-	char *uuid_p = NULL;
+	char *requestUuid = NULL;
+	int ret = 0;
 
-	requestUuid = mg_get_header(conn, "X-Request-UUID");
+	requestUuid = (char *) mg_get_header(conn, "X-Request-UUID");
 	int typeReply = 1;
 
+	if((ret = check_extra_delete(conn, (char*) request_info->uri, jobj_reply, requestUuid)) != 0) 
+	{
 
-	if (!strncmp(request_info->uri, API_DELETE_BACKUP, strlen(API_DELETE_BACKUP))) {
+	        if(ret == 1) send_json_reply(conn, "200 OK", jobj_reply, requestUuid, typeReply);
+                return 1;
+	}
+	else if (!strncmp(request_info->uri, API_DELETE_BACKUP, strlen(API_DELETE_BACKUP))) 
+	{
 
 			jobj_reply = json_object_new_object();
 			add_base_info(jobj_reply, "ok", "all good");
@@ -388,7 +396,8 @@ int proceed_delete_request(struct mg_request_info * request_info, struct mg_conn
 			send_json_reply(conn, "200 OK", jobj_reply, requestUuid, typeReply);
 
 			return 1;
-	} else {
+        }
+	else {
 		send_reply(conn, "404 Not found", "the api call was not found",requestUuid);
 		return 1;
 	}
@@ -400,18 +409,14 @@ int proceed_post_request(struct mg_request_info * request_info, struct mg_connec
 	int post_data_len = 0, ret = 0;
 	char post_data[8000], dst_path[200], src_path[200];
 	FILE *file;
-	json_object *jobj_reply = NULL;
+	json_object *jobj_reply = NULL, *obj = NULL;
 	char *filename = NULL;
 	char bufpath[PATH_MAX + 1];
 	const char *tmp = NULL, *dmp = NULL, *requestUuid = NULL;
 	int typeReply = 1;
-	int index = 0;
-
-
 
 	/* get request UUID */
 	requestUuid = mg_get_header(conn, "X-Request-UUID");
-
 
 	if (!strncmp(request_info->uri, API_SAVE_CONFIG, strlen(API_SAVE_CONFIG))) {
 
@@ -433,9 +438,17 @@ int proceed_post_request(struct mg_request_info * request_info, struct mg_connec
 				add_base_info(jobj_reply, "bad", "couldnot parse");
 			} else {
 
-				dmp = json_object_get_string(json_object_object_get(jobj, "file"));
-
-				if (dmp != NULL && (tmp = json_object_get_string(json_object_object_get(jobj, "data"))) != NULL) {
+                                if(json_object_object_get_ex(jobj, "file", &obj) && obj != NULL) 
+                                {
+                                        dmp = json_object_get_string(obj);
+                                }
+                                
+                                if(json_object_object_get_ex(jobj, "data", &obj) && obj != NULL) 
+                                {
+                                        tmp = json_object_get_string(obj);
+                                }
+                                                                
+				if (dmp != NULL && tmp != NULL) {
 
 					xml_node *node = xml_node_str((char *)tmp, strlen(tmp));
 
@@ -495,7 +508,12 @@ int proceed_post_request(struct mg_request_info * request_info, struct mg_connec
 			}
 			else {
 
-				if((tmp = json_object_get_string(json_object_object_get(jobj, "backup")))!= NULL){
+                                if(json_object_object_get_ex(jobj, "backup", &obj) && obj != NULL) 
+                                {
+                                        tmp = json_object_get_string(obj);
+                                }
+
+				if(tmp != NULL){
 
 					snprintf(dst_path, 200, "%s%s", global_config_path, filename);
 					snprintf(src_path, 200, "%s/%s", backup_dir, tmp);
@@ -551,10 +569,18 @@ int proceed_post_request(struct mg_request_info * request_info, struct mg_connec
 			}
 			else {
 
-				dmp = json_object_get_string(json_object_object_get(jobj, "backup"));
+			        if(json_object_object_get_ex(jobj, "backup", &obj) && obj != NULL) 
+                                {
+                                        dmp = json_object_get_string(obj);
+                                }
+                                
+                                if(json_object_object_get_ex(jobj, "destination", &obj) && obj != NULL) 
+                                {
+                                        tmp = json_object_get_string(obj);
+                                }
 
-				if((tmp = json_object_get_string(json_object_object_get(jobj, "destination")))!= NULL){
-
+				if(tmp != NULL && dmp != NULL)
+				{
 					snprintf(src_path, 200, "%s/%s", global_config_path, dmp);
 					snprintf(dst_path, 200, "%s/%s", backup_dir, tmp);
 
@@ -581,14 +607,19 @@ int proceed_post_request(struct mg_request_info * request_info, struct mg_connec
 				}
 
 				json_object_put(jobj);
-
 			}
 
 			send_json_reply(conn, "200 OK", jobj_reply, requestUuid, typeReply);
 
 			return 1;
 			
-	} else {
+        }
+        else if((ret = check_extra_create(conn, (char *)request_info->uri, jobj_reply, post_data, requestUuid)) != 0) 
+        {
+                if(ret == 1) send_json_reply(conn, "200 OK", jobj_reply, requestUuid, typeReply);
+                return 1;
+        }                                                  
+	else {
 
 		jobj_reply = json_object_new_object();
 		add_base_info(jobj_reply, "bad", "API not registered");
@@ -602,16 +633,20 @@ int proceed_put_request(struct mg_request_info * request_info, struct mg_connect
 	json_object *jobj_reply = NULL;
 	const char *requestUuid = NULL;
 	int typeReply = 1;
-	char *uuid_p = NULL;
-        int post_data_len = 0, ret = 0;
+        int ret = 0;
         char post_data[8000];
           
 
 	/* get request UUID */
 	requestUuid = mg_get_header(conn, "X-Request-UUID");
-
-        if(1) {
-
+	
+	if((ret = check_extra_update(conn, (char *)request_info->uri, jobj_reply, post_data, requestUuid)) != 0) 
+        {
+                if(ret == 1) send_json_reply(conn, "200 OK", jobj_reply, requestUuid, typeReply);
+                return 1;
+        }                                                  
+        else 
+        {
         	jobj_reply = json_object_new_object();
         	add_base_info(jobj_reply, "bad", "API not registered");
         	send_json_reply(conn, "404 Not found", jobj_reply, requestUuid, typeReply);
@@ -626,19 +661,15 @@ int proceed_get_request(struct mg_request_info * request_info, struct mg_connect
 	json_object *jobj_reply = NULL;
 	DIR *dp;
 	struct dirent *dir;
-	char *config = NULL, *b64_sha = NULL,  *modulereq = NULL,*filename = NULL;
+	char *config = NULL, *b64_sha = NULL, *filename = NULL;
 	char buf[800], tmpser[100];
-	char *uuid_p =  NULL;	        
 	struct stat fstat;
 	struct module *m = NULL;
 	const char *requestUuid = NULL;
-	int typeReply = 1;
-	char module_api_name[256];
-
+	int typeReply = 1, ret = 0;
 
 	/* get request UUID */
 	requestUuid = mg_get_header(conn, "X-Request-UUID");
-
 
 	if (!strncmp(request_info->uri, API_MODULE_STATS, strlen(API_MODULE_STATS))) {
 
@@ -724,129 +755,20 @@ int proceed_get_request(struct mg_request_info * request_info, struct mg_connect
 		return 1;
 
 	} 	
-	else if (!strncmp(request_info->uri, API_MODULE_EXEC, strlen(API_MODULE_EXEC))) {
-
-		jobj_reply = json_object_new_object();
-			
-		char *tmp = request_info->uri+strlen(API_MODULE_EXEC)+1;
-		char *ret = NULL;		
-		char *cur = tmp;		
-		int index = 0;
-		
-		ret = strchr(cur, '/');
-		if(ret != NULL) {
-				        
-        		snprintf(module_api_name, sizeof(module_api_name), "%.*s_bind_api", ret - cur, tmp);
-
-	        	add_base_info(jobj_reply, "ok", "all good");		
-	        	json_object_object_add(jobj_reply, "data", json_object_new_int(index));
-	        	send_json_reply(conn, "200 OK", jobj_reply, requestUuid, typeReply);
-                }
-                else {
-	        	add_base_info(jobj_reply, "bad", "API not registered");
-        		send_json_reply(conn, "503 Bad parameter", jobj_reply, requestUuid, typeReply);                        
-                }
-
-		return 1;
-
-	} 
+	else if((ret = check_extra_get(conn, (char *)request_info->uri, jobj_reply, requestUuid)) != 0) 
+        {
+                if(ret == 1) send_json_reply(conn, "200 OK", jobj_reply, requestUuid, typeReply);
+                return 1;
+        }                                                  
 	else if (!strncmp(request_info->uri, API_RELOAD_MODULE, strlen(API_RELOAD_MODULE))) {
 
 			jobj_reply = json_object_new_object();
 			add_base_info(jobj_reply, "ok", "all good");
-			char erbuf[200];
 
-			modulereq = (char *) request_info->uri + strlen(API_RELOAD_MODULE) + 1;
+			//char *modulereq = NULL;
+			//modulereq = (char *) request_info->uri + strlen(API_RELOAD_MODULE) + 1;
 
 			/* socket module */
-			/*
-			if(!strncmp(modulereq, "socket_", 7)) {
-
-				for(i=0; i < MAX_API; i++) {
-					if(!profile_interface.socket_api[i].module_name)
-					{
-						break;
-					}
-
-					if(!strncmp(modulereq, profile_interface.socket_api[i].module_name, strlen(profile_interface.socket_api[i].module_name))){
-
-						found_module = 1;
-						if(profile_interface.socket_api[i].reload_f(erbuf, 200)) {
-							add_base_info(jobj_reply, "ok", "reloaded");
-						}
-						else {
-							add_base_info(jobj_reply, "bad", erbuf);
-						}
-						break;
-					}
-				}
-
-			}
-			else if(!strncmp(modulereq, "transport_", 9)) {
-
-					for(i=0; i < MAX_API; i++) {
-							if(!profile_interface.transport_api[i].module_name)
-							{
-									break;
-							}
-
-							if(!strncmp(modulereq, profile_interface.transport_api[i].module_name, strlen(profile_interface.transport_api[i].module_name))){
-
-									found_module = 1;
-
-									if(profile_interface.transport_api[i].reload_f(erbuf, 200)) {
-										add_base_info(jobj_reply, "ok", "reloaded");
-									}
-									else {
-										add_base_info(jobj_reply, "bad", erbuf);
-									}
-
-									break;
-							}
-					}
-			}
-			else if(!strncmp(modulereq, "database_", 9)) {
-
-					for(i=0; i < MAX_API; i++) {
-
-							if(!profile_interface.database_api[i].module_name)
-							{
-								break;
-							}
-
-							if(!strncmp(modulereq, profile_interface.database_api[i].module_name, strlen(profile_interface.database_api[i].module_name))){
-									found_module = 1;
-									if(profile_interface.database_api[i].reload_f(erbuf, 200)) {
-										add_base_info(jobj_reply, "ok", "reloaded");
-									}
-									else {
-										add_base_info(jobj_reply, "bad", erbuf);
-									}
-									break;
-							}
-					}
-			}
-			else if(!strncmp(modulereq, "protocol_", 9)) {
-
-					for(i=0; i < MAX_API; i++) {
-							if(!profile_interface.proto_api[i].module_name)
-							{
-									break;
-							}
-
-							if(!strncmp(modulereq, profile_interface.proto_api[i].module_name, strlen(profile_interface.proto_api[i].module_name))){
-									found_module = 1;
-									if(profile_interface.proto_api[i].reload_f(erbuf, 200)) {
-										add_base_info(jobj_reply, "ok", "reloaded");
-									}
-									else {
-										add_base_info(jobj_reply, "bad", erbuf);
-									}
-									break;
-							}
-					}
-			}
-			*/
 
 			if(found_module ==  0) {
 				add_base_info(jobj_reply, "bad", "module not found");

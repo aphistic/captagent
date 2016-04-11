@@ -4,13 +4,13 @@ After=network.target
 
 [Service]
 Type=forking
-Environment='CFGFILE=/usr/local/rtpagent/etc/captagent.xml'
+Environment='CFGFILE=/usr/local/captagent/etc/captagent.xml'
 EnvironmentFile=-/etc/default/captagent
 EnvironmentFile=-/etc/default/captagent.d/*
 # PIDFile requires a full absolute path
 PIDFile=/var/run/captagent.pid
 # ExecStart requires a full absolute path
-ExecStart=/usr/local/rtpagent/bin/captagent -f $CFGFILE -d
+ExecStart=/usr/local/captagent/bin/captagent -f $CFGFILE -d
 Restart=Always
 
 [Install]

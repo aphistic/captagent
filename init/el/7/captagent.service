@@ -4,7 +4,7 @@ After=syslog.target network.target auditd.service
 
 [Service]
 EnvironmentFile=/etc/sysconfig/captagent
-ExecStart=/usr/local/rtpagent/bin/captagent -f $CFG_FILE -d
+ExecStart=/usr/local/captagent/bin/captagent -f $CFG_FILE -d
 KillMode=process
 Restart=Always
 RestartSec=42s

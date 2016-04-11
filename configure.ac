@@ -19,7 +19,7 @@ AC_SUBST([ZLIB])
 AC_MSG_CHECKING([whether to use ssl])
 enableSSL=no
 AC_ARG_ENABLE(ssl,
-   [  --enable-ssl	Enable SSL support)],
+   [  --enable-ssl	Enable SSL support],
    [SSL="$enableval"]
    enableSSL=yes,
    [SSL="no"]
@@ -30,7 +30,7 @@ AC_SUBST([SSL])
 useMysql=no
 AC_MSG_CHECKING([whether to use mysql])
 AC_ARG_ENABLE(mysql,
-   [  --enable-mysql    Enable mysql support)],
+   [  --enable-mysql    Enable mysql support],
    [MYSQL="$enableval"]
    useMysql=yes,
    [MYSQL="no"]
@@ -42,7 +42,7 @@ AC_SUBST([MYSQL])
 usePCRE=no
 AC_MSG_CHECKING([whether to use pcre])
 AC_ARG_ENABLE(pcre,
-   [  --enable-pcre    Enable pcre support)],
+   [  --enable-pcre    Enable pcre support],
    [PCRE="$enableval"]
    usePCRE=yes,
    [PCRE="no"]
@@ -53,7 +53,7 @@ AC_SUBST([PCRE])
 useRedis=no
 AC_MSG_CHECKING([whether to use redis])
 AC_ARG_ENABLE(redis,
-   [  --enable-redis    Enable redis support)],
+   [  --enable-redis    Enable redis support],
    [REDIS="$enableval"]
    useRedis=yes,
    [REDIS="no"]
@@ -64,13 +64,23 @@ AC_SUBST([REDIS])
 useLIBUV=no
 AC_MSG_CHECKING([whether to use libuv])
 AC_ARG_ENABLE(libuv,
-   [  --enable-libuv    Enable libuv support)],
+   [  --enable-libuv    Enable libuv support],
    [LIBUV="$enableval"]
    useLIBUV=yes,
    [LIBUV="no"]
 )
 AC_MSG_RESULT([$LIBUV])
 AC_SUBST([LIBUV])
+
+enableExtraModules=no
+AC_ARG_ENABLE(extramodules,
+   [  --enable-extramodules	Enable extra modules],
+   [EXTRAMODULES="$enableval"]
+   enableExtraModules=yes,
+   [EXTRAMODULES="no"]
+)
+AC_MSG_RESULT([$EXTRAMODULES])
+AC_SUBST([EXTRAMODULES])
 
 CONFIG_CFLAGS="${CFLAGS}"
 CONFIG_LDFLAGS="${LDFLAGS}"
@@ -218,6 +228,16 @@ if test "$REDIS" = "yes"; then
    AC_CHECK_LIB(hiredis, redisCommand, [ HIREDIS_LIBS="-lhiredis" ], [AC_MSG_ERROR([captagent requires but cannot find lhiredis])])
    AC_DEFINE(USE_REDIS, 1, [Use REDIS library])
    AC_SUBST(HIREDIS_LIBS)
+fi
+
+
+dnl
+dnl check for extra modules
+dnl
+   
+if test "$EXTRAMODULES" = "yes"; then
+   AC_CHECKING([for extra modules files])
+   AC_DEFINE(HAVE_EXTRA_MODULES, 1, [We have extra modules])
 fi
 
 

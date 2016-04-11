@@ -21,12 +21,12 @@
 . /etc/rc.d/init.d/functions
 
 prog=captagent
-APP_FILE=/usr/local/rtpagent/bin/$prog
+APP_FILE=/usr/local/captagent/bin/$prog
 PID_FILE=/var/run/$prog.pid
 LOCK_FILE=/var/lock/subsys/$prog
 RETVAL=0
 
-[ -z "$CFG_FILE" ]  && CFG_FILE=/usr/local/rtpagent/etc/captagent.xml
+[ -z "$CFG_FILE" ]  && CFG_FILE=/usr/local/captagent/etc/captagent.xml
 
 OPTIONS="-f $CFG_FILE"
 

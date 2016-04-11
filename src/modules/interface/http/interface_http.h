@@ -5,12 +5,24 @@
  *  Duplicate SIP messages in Homer Encapulate Protocol [HEP] [ipv6 version]
  *
  *  Author: Alexandr Dubovikov <alexandr.dubovikov@gmail.com>
- *  (C) 2012-2013 
+ *  (C) Homer Project 2012-2015 (http://www.sipcapture.org)
  *
- *  PROPERITARY LICENSE! 
- *  Prohibited to use without license agreement with Alexandr Dubovikov
+ * Homer capture agent is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version
+ *
+ * Homer capture agent is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
 */
+
 
 #ifndef _CORE_XLI_H_
 #define _CORE_XLI_H_
@@ -30,6 +42,12 @@ int readbody = 0;
 #define API_READ_CONFIG "/api/config/read"
 #define API_READ_BACKUP "/api/backup/read"
 #define API_DELETE_BACKUP "/api/backup"
+
+#define API_INTERCEPTION_CREATE "/api/interception"
+#define API_INTERCEPTION_UPDATE "/api/interception/"
+#define API_INTERCEPTION_GET "/api/interception/"
+#define API_INTERCEPTIONS_GET "/api/interceptions"
+#define API_INTERCEPTION_DELETE "/api/interception/"
 
 #define API_LIST_BACKUP "/api/backup/list"
 #define API_SAVE_CONFIG "/api/config/save"
