@@ -40,12 +40,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#ifndef DEFAULT_CONFDIR
-#define DEFAULT_CONFDIR "/usr/local/etc/captagent/"
-#endif
+#include "config.h"
 
-#ifndef DEFAULT_CAPTURE_PLANDIR
-#define DEFAULT_CAPTURE_PLANDIR "/usr/local/etc/captagent/scripts"
+#ifndef AGENT_CONFIG_DIR
+#define AGENT_CONFIG_DIR "/usr/local/etc/captagent/"
+#endif //DEF_CONF
+
+#ifndef AGENT_PLAN_DIR
+#define AGENT_PLAN_DIR "/usr/local/etc/captagent/captureplans"
 #endif
 
 

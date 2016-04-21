@@ -251,8 +251,8 @@ int main(int argc, char *argv[]) {
 
 	timestart = time(0);
 
-	captagent_config = DEFAULT_CONFIG;
-
+	captagent_config = DEFAULT_CAPT_CONFIG;
+	
 	while ((c = getopt(argc, argv, "dcvhnEKf:D:")) != EOF) {
 
 		switch (c) {
@@ -430,6 +430,7 @@ int core_config(xml_node *config) {
 	xml_node *modules;
 	char *key, *value;
 	int _use_syslog = 0;
+	int mlen = 0;
 
 	LNOTICE("Loaded core config");
 
@@ -494,8 +495,13 @@ int core_config(xml_node *config) {
 		modules = modules->next;
 	}
 
-	if(!global_config_path)	global_config_path = strdup(DEFAULT_CONFDIR);
-	if(!global_capture_plan_path) global_capture_plan_path = strdup(DEFAULT_CAPTURE_PLANDIR);
+	if(!global_config_path)	{
+		global_config_path = strdup(AGENT_CONFIG_DIR);
+	}
+
+	if(!global_capture_plan_path) {	
+		global_capture_plan_path = strdup(AGENT_PLAN_DIR);		
+	}	
 
 	set_log_level(debug_level);
 

@@ -27,9 +27,13 @@
 #define CAPTAGENT_H_
 
 #include "md5.h"
+#include "config.h"
+#include <captagent/api.h>
 
-#define CAPTAGENT_VERSION "6.0.0"
-#define DEFAULT_CONFIG DEFAULT_CONFDIR "captagent.xml"
+#define CAPTAGENT_VERSION "6.1.0"
+
+#define DEFAULT_CAPT_CONFIG AGENT_CONFIG_DIR "captagent.xml"
+
 #define DEFAULT_PIDFILE  "/var/run/captagent.pid"
 #define MAX_STATS 3000
 

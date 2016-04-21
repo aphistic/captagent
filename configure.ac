@@ -6,6 +6,20 @@ AM_INIT_AUTOMAKE(foreign tar-ustar)
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_SRCDIR([src/captagent.c])
 AC_MSG_CHECKING([whether to use compression])
+
+AC_PREFIX_DEFAULT(/usr/local/captagent)
+
+if test "$prefix" = "NONE"; then
+   prefix=$ac_default_prefix
+fi
+
+agent_config_dir=$prefix"/etc/captagent/"
+agent_plan_dir=$prefix"/etc/captagent/"
+
+AC_DEFINE_UNQUOTED(AGENT_PREFIX, ["$prefix"], [our system prefix])
+AC_DEFINE_UNQUOTED(AGENT_CONFIG_DIR, ["$agent_config_dir"], [captagent config dir])
+AC_DEFINE_UNQUOTED(AGENT_PLAN_DIR, ["$agent_plan_dir"], [capture plans dir])
+
 enableCompression=no
 AC_ARG_ENABLE(compression,
    [  --enable-compression	Enable compression support)],
