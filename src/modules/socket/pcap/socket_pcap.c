@@ -438,6 +438,8 @@ int init_socket(unsigned int loc_idx) {
 	char errbuf[PCAP_ERRBUF_SIZE];
 	char filter_expr[FILTER_LEN];
 	int len=0, buffer_size = 0;
+
+	LDEBUG("Activating device: %s\n", profile_socket[loc_idx].device);
         
 	if (profile_socket[loc_idx].device) {
 	
@@ -468,10 +470,12 @@ int init_socket(unsigned int loc_idx) {
 			return -1;									
 		};
 		
-		if (pcap_activate(sniffer_proto[loc_idx]) == -1) {
-			LERR("Failed to activate [%d] \"%s\": %s", (char *) profile_socket[loc_idx].device, pcap_geterr(sniffer_proto[loc_idx]));
+		if (pcap_activate(sniffer_proto[loc_idx]) != 0) {
+			LERR("Failed to activate  \"%s\": %s", (char *) profile_socket[loc_idx].device, pcap_geterr(sniffer_proto[loc_idx]));
 			return -1;									
 		};
+		
+		LDEBUG("Activated device: [%s]\n", profile_socket[loc_idx].device);
 						
 	} else {
 		LERR("File : %s", usefile);;
@@ -571,10 +575,11 @@ int set_raw_filter(unsigned int loc_idx, char *filter) {
 void* proto_collect(void *arg) {
 
 	unsigned int loc_idx = (int *) arg;
-	int ret = 0;
+	int ret = 0, dl = 0;
 
+	dl = pcap_datalink(sniffer_proto[loc_idx]);
 	/* detect link_offset. Thanks ngrep for this. */
-	switch (pcap_datalink(sniffer_proto[loc_idx])) {
+	switch (dl) {
 	case DLT_EN10MB:
 		link_offset = ETHHDR_SIZE;
 		break;
@@ -613,7 +618,7 @@ void* proto_collect(void *arg) {
 		break;
 
 	default:
-		LERR("fatal: unsupported interface type %u", pcap_datalink(sniffer_proto[loc_idx]));
+		LERR("fatal: unsupported interface type [%u] [%d]", dl, dl);
 		exit(-1);
 	}
 
