@@ -156,6 +156,9 @@ int reload_config (char *erbuf, int erlen) {
 void callback_proto(u_char *useless, struct pcap_pkthdr *pkthdr, u_char *packet) {
 
 	uint8_t hdr_offset = 0;
+	
+	unsigned char* ethaddr = NULL;
+	unsigned char* mplsaddr = NULL;
 
 	/* Pat Callahan's patch for MPLS */
 	memcpy(&ethaddr, (packet + 12), 2);
