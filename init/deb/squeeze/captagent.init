@@ -15,7 +15,7 @@
 . /lib/lsb/init-functions
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/local/rtpagent/bin/captagent
+DAEMON=/usr/local/captagent/bin/captagent
 NAME=`basename "$0"`
 DESC="Captagent"
 HOMEDIR=/var/run/$NAME
